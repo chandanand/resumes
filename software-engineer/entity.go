@@ -1,4 +1,6 @@
 package main
 
-type resume struct {
+type Resume struct {
+	Name     string
+	Location string
 }
