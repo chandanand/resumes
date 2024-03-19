@@ -11,26 +11,26 @@ import (
 )
 
 const (
-	_dataFile    = "data.yml"
-	_htmlFile    = "chand_anand.html"
-	_templateDir = "tmpl"
+	_dataFileName    = "data.yml"
+	_htmlFileName    = "chand_anand.html"
+	_templateDirName = "tmpl"
 )
 
-func get_resume_data() (Resume, error) {
-	data_file, err := os.ReadFile(_dataFile)
+func getResumeData(dataFilepath string) (Resume, error) {
+	dataFile, err := os.ReadFile(dataFilepath)
 	if err != nil {
 		return Resume{}, err
 	}
 
-	var resume_data Resume
-	if err := yaml.Unmarshal(data_file, &resume_data); err != nil {
+	var resumeData Resume
+	if err := yaml.Unmarshal(dataFile, &resumeData); err != nil {
 		return Resume{}, err
 	}
 
-	return resume_data, nil
+	return resumeData, nil
 }
 
-func get_tmpl_filepaths(dirName string) ([]string, error) {
+func getTmplFilepaths(dirName string) ([]string, error) {
 	var filepaths []string
 
 	if err := filepath.Walk(dirName,
@@ -50,41 +50,41 @@ func get_tmpl_filepaths(dirName string) ([]string, error) {
 	return filepaths, nil
 }
 
-func generate_html(paths []string, resume_data Resume) (string, error) {
+func generateHTML(paths []string, resumeData Resume) (string, error) {
 	tmpl, err := template.ParseFiles(paths...)
 	if err != nil {
 		return "", err
 	}
 
 	var buf bytes.Buffer
-	if err := tmpl.Execute(&buf, resume_data); err != nil {
+	if err := tmpl.Execute(&buf, resumeData); err != nil {
 		return "", err
 	}
 
 	return buf.String(), nil
 }
 
-func write_html(path string, content string) error {
+func writeHTML(path string, content string) error {
     return os.WriteFile(path, []byte(content), 0644)
 }
 
 func main() {
-	resume_data, err := get_resume_data()
+	resumeData, err := getResumeData(_dataFileName)
 	if err != nil {
 		log.Fatal("error reading data file: ", err)
 	}
 
-	filepaths, err := get_tmpl_filepaths(_templateDir)
+	filepaths, err := getTmplFilepaths(_templateDirName)
 	if err != nil {
 		log.Fatal("error reading tmpl dir: ", err)
 	}
 
-    html, err := generate_html(filepaths, resume_data)
+    html, err := generateHTML(filepaths, resumeData)
     if err != nil {
 		log.Fatal("error generating html: ", err)
     }
 
-    if err := write_html(_htmlFile, html); err != nil {
+    if err := writeHTML(_htmlFileName, html); err != nil {
 		log.Fatal("error writing html: ", err)
     }
 }
