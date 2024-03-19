@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"fmt"
 	"html/template"
 	"log"
 	"os"
@@ -13,6 +12,7 @@ import (
 
 const (
 	_dataFile    = "data.yml"
+	_htmlFile    = "chand_anand.html"
 	_templateDir = "tmpl"
 )
 
@@ -64,6 +64,10 @@ func generate_html(paths []string, resume_data Resume) (string, error) {
 	return buf.String(), nil
 }
 
+func write_html(path string, content string) error {
+    return os.WriteFile(path, []byte(content), 0644)
+}
+
 func main() {
 	resume_data, err := get_resume_data()
 	if err != nil {
@@ -80,5 +84,7 @@ func main() {
 		log.Fatal("error generating html: ", err)
     }
 
-    fmt.Println(html)
+    if err := write_html(_htmlFile, html); err != nil {
+		log.Fatal("error writing html: ", err)
+    }
 }
