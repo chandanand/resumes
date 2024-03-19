@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
+	"html/template"
 	"log"
 	"os"
 	"path/filepath"
@@ -48,18 +50,35 @@ func get_tmpl_filepaths(dirName string) ([]string, error) {
 	return filepaths, nil
 }
 
+func generate_html(paths []string, resume_data Resume) (string, error) {
+	tmpl, err := template.ParseFiles(paths...)
+	if err != nil {
+		return "", err
+	}
+
+	var buf bytes.Buffer
+	if err := tmpl.Execute(&buf, resume_data); err != nil {
+		return "", err
+	}
+
+	return buf.String(), nil
+}
+
 func main() {
 	resume_data, err := get_resume_data()
 	if err != nil {
 		log.Fatal("error reading data file: ", err)
 	}
 
-	fmt.Printf("%+v\n", resume_data)
-
 	filepaths, err := get_tmpl_filepaths(_templateDir)
 	if err != nil {
 		log.Fatal("error reading tmpl dir: ", err)
 	}
 
-	fmt.Println(filepaths)
+    html, err := generate_html(filepaths, resume_data)
+    if err != nil {
+		log.Fatal("error generating html: ", err)
+    }
+
+    fmt.Println(html)
 }
